@@ -1,0 +1,61 @@
+<launch>
+    <let name="urdf_path" value="$(find-pkg-share my_urdfs)/urdf/bumperbot.urdf.xacro"/>
+    <let name="gazebo_config_path" value="$(find-pkg-share program_bringup)/config/gazebo_bridge.yaml"/>
+    <let name="rviz_config" value="$(find-pkg-share my_urdfs)/rviz/bumperbot.rviz"/>
+    <include file="$(find-pkg-share program_bringup)/launch/joystick.launch.py" />
+
+    <!-- TF publisher  -->
+    <node pkg="robot_state_publisher" exec="robot_state_publisher">
+        <param name="robot_description"
+               value="$(command 'xacro $(var urdf_path)')" />
+        <param name="publish_fixed_joints" value="true"/>
+        <param name="use_sim_time" value="true"/>
+    </node>
+
+    <!-- Gazebo stuff  -->
+    <set_env name="GZ_SIM_RESOURCE_PATH"
+         value="$(find-pkg-share program_bringup)/models"/>
+
+    <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
+        <arg name="gz_args" value="$(find-pkg-share program_bringup)/world/small_house.world -r" />
+    </include>
+
+    <node pkg="ros_gz_sim" exec="create" args="-topic robot_description" />
+
+    <!-- Ros-gz bridge  -->
+    <node pkg="ros_gz_bridge" exec="parameter_bridge">
+        <param name="config_file" value="$(var gazebo_config_path)"/>
+    </node>
+
+    <!-- rviz starter  -->
+    <node pkg="rviz2" exec="rviz2" />
+
+    <!-- Controller spawners  -->
+            <!-- joint state broadcaster  -->
+    <node pkg="controller_manager" exec="spawner" args="joint_state_broadcaster"/>
+
+            <!-- diff drive controller  -->
+    <!-- <node pkg="controller_manager" exec="spawner" args="diff_drive_controller"/> -->
+
+                <!-- simple velocity controller  -->
+    <node pkg="controller_manager" exec="spawner" args="simple_velocity_controller"/>
+
+    <!-- controlling nodes -->
+    
+    <!-- <node pkg="my_py_pkg1" exec="noise_simulator" output="screen">
+        <param name="use_sim_time" value="true"/>
+    </node> -->
+    <!-- <node pkg="my_py_pkg1" exec="kalman_filter"/> -->
+
+    <node pkg="my_py_pkg1" exec="joint_speed_controller" output="screen">
+        <param name="use_sim_time" value="true"/>
+    </node>
+
+    <!--Safety Stop-->
+    <!-- <node pkg="my_py_pkg1" exec="safety_stop" output="screen">
+        <param name="use_sim_time" value="true"/>
+    </node> -->
+
+
+
+</launch>
