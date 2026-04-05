@@ -43,7 +43,10 @@ Generated a map of a real indoor environment
 Visualized mapping results in RViz
 
 ## 🖼 Real-World Mapping Result
-![Map](media/real_lidar_map.png)
+
+<p align="center">
+  <img src="./media/real_lidar_map.png" width="700">
+</p>
 
 (Mapping performed using YDLIDAR in a real indoor environment)
 
